@@ -30,6 +30,20 @@
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 ; Specter is a Clojure/Script library that lets you
 ; elegantly and performantly manipulate your
 ; data while maintaining its type.
@@ -68,23 +82,25 @@
 
 
 
+; Specter, on the other hand, respects your data's types.
+(transform ALL inc #{1 2 3 4})
+(transform ALL inc [1 2 3 4])
+(transform ALL inc '(1 2 3 4))
+
+
+
+
+
+
+
+
+
 
 ; Specter has two main macros,
 ; `select` and `transform`.
 
 ; `select` is basically `get-in` on steroids, and
 ; `transform` is basically `update-in` on steroids.
-
-; We'll be looking at them
-; both in detail, but for now, check this out:
-(transform ALL inc #{1 2 3 4})
-(transform ALL inc [1 2 3 4])
-(transform ALL inc '(1 2 3 4))
-
-
-; So: at this point we're convinced that specter
-; has a `transform` macro, and that it doesn't
-; mess with our data structures' types.
 
 ; We'll come back to `transform`.
 ; For now, though, let's take a look at `select`.
@@ -217,6 +233,14 @@ sausage
 "Sausage"
 
 
+(select [ALL :favorite-foods ALL :name] people)
+
+
+
+
+
+
+
 ; [ALL :favorite-foods ALL :name] is a "path".
 ; Each of the elements within that path
 ; is a "navigator".
@@ -305,10 +329,17 @@ sausage
 ; I'm sure there are lots of uses for `transform`,
 ; but so far I've mainly found myself using `select`.
 
+
+
+
 ; I was working on a simple grid-based game,
-; where players make a move by placing several
+; where players make a move by placing
 ; "tiles" down on the board in a horizontal or
 ; vertical line.
+; A "tile" is a number between 0 and 9.
+
+
+
 
 ; So a move looks like [move-part move-part ...],
 ; and a move-part looks like [[x y] value].
@@ -354,7 +385,7 @@ sausage
 
 ; Now let's look at a slightly trickier select.
 ; In my game, the board is represented as a 2D
-; vector or integers-or-nils.
+; vector of integers-or-nils.
 
 (comment
   (print-grid (g/make-empty-grid 5 5)))
@@ -365,6 +396,9 @@ sausage
 ; positions of cells that met certain criteria -
 ; functions like `find-empty-cells`,
 ; `find-blocked-cells`, etc.
+
+
+; Here's a grid with some tiles placed on it.
 
 (def grid (-> (g/make-empty-grid 5 5)
               (assoc-in [4 4] 5)
@@ -384,10 +418,18 @@ sausage
 
 
 
+
 ; Dang, that gave us the _values_ of the non-nil cells,
 ; but we wanted their _positions_!
 
 ; We're gonna need to use a few new navigators for this.
+
+
+
+
+
+
+
 
 ; First, here's how we get the even numbers
 ; in a sequence.
@@ -399,6 +441,8 @@ sausage
 
 ; Now let's figure out how to get the _indexes_
 ; of the even numbers in a sequence.
+
+(select [INDEXED-VALS] [5 6 7 8])
 
 (select [INDEXED-VALS (collect-one FIRST) LAST
          even?]
@@ -439,8 +483,11 @@ sausage
 ; to find the [x y] positions of non-nil values
 ; in our 2D vector.
 
+grid
+
 (select [INDEXED-VALS (collect-one FIRST) LAST
 
          INDEXED-VALS (selected? LAST some?) FIRST]
 
         grid)
+
