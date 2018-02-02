@@ -20,11 +20,20 @@
 
 
 
+; Lightning talk: Specter
+
+; JR Heard
+; jrheard.com
 
 
 ; (Much of this lightning talk is yanked
 ; straight from James Trunk's screencast:
 ; https://www.youtube.com/watch?v=rh5J4vacG98 )
+
+
+
+
+
 
 
 
@@ -163,13 +172,10 @@
 ; OK, let's start off by getting the names of
 ; everyone's favorite foods.
 
-(map #(->> %
-           :favorite-foods
-           (map :name))
-     people)
-
-; Oh, right, gotta change that line to use mapcat
-; instead of map.
+(mapcat #(->> %
+              :favorite-foods
+              (map :name))
+        people)
 
 
 
@@ -179,9 +185,6 @@
 ; Here's how to do the same thing using Specter.
 
 (select [ALL :favorite-foods ALL :name] people)
-
-
-
 
 
 
@@ -252,14 +255,14 @@ sausage
 
 
 
-
-
-; `transform` is just like select, except that it
+; `transform` is just like `select`, except that it
 ; transforms the original data structure
 ; instead of returning a filtered view of it.
 
 ; We used `select` like this:
 ; (select path data)
+
+(select [ALL :favorite-foods ALL :name] people)
 
 ; `transform` has a similar signature:
 ; (transform path transform-fn data)
@@ -311,9 +314,8 @@ sausage
             #(> (count %) 1)]
 
            reverse
-           people)
 
-; I'm honestly not sure how I'd do that without Specter.
+           people)
 
 
 
@@ -362,9 +364,42 @@ sausage
 ; or vertical, I can grab all of its Xs and see if
 ; they're identical.
 
+
+; START
+[[[2 2] 5]
+ [[2 3] 8]
+ [[2 4] 7]
+ [[2 5] 0]
+ [[2 6] 0]]
+
+; ALL
+[[2 2] 5]
+[[2 3] 8]
+[[2 4] 7]
+[[2 5] 0]
+[[2 6] 0]
+
+; FIRST
+[2 2]
+[2 3]
+[2 4]
+[2 5]
+[2 6]
+
+; FIRST
+2
+2
+2
+2
+2
+
+
+
 (select [ALL FIRST FIRST] a-move)
 
-; They are, so that means that this move was vertical.
+
+; The x-values are all the same,
+; so that means that this move was vertical.
 
 ; Just for grins, let's grab the Ys:
 
@@ -483,7 +518,16 @@ sausage
 ; to find the [x y] positions of non-nil values
 ; in our 2D vector.
 
-grid
+(def grid (-> (g/make-empty-grid 5 5)
+              (assoc-in [4 4] 5)
+              (assoc-in [4 3] 8)
+              (assoc-in [4 2] 7)
+              (assoc-in [3 2] 3)))
+
+
+(comment
+  (print-grid grid))
+
 
 (select [INDEXED-VALS (collect-one FIRST) LAST
 
